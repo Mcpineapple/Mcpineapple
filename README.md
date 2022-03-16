@@ -1,6 +1,6 @@
 ### Howdy, I'm Mcpineapple. 🌻
 - I'm currently working on N-RPG, a school project.
-- I'm learning Rust, but I'm always trying to expand my python skills.
+- I'm learning Rust, but I'm always trying to expand my Python skills.
 - Pronouns : He/Him.
 <!--
 **Mcpineapple/Mcpineapple** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
