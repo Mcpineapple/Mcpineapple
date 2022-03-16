@@ -1,4 +1,4 @@
-### Howdy, I'm Mcpineapple. 👋
+### Howdy, I'm Mcpineapple. 🌻
 - I'm currently working on N-RPG, a school project.
 - I'm learning Rust, but I'm always trying to expand my python skills.
 - Pronouns : He/Him.
