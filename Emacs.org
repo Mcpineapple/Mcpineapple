@@ -1,0 +1,563 @@
+#+title Le Emacs Config
+#+PROPERTY: header-args:emacs-lisp :tangle ./init.el
+* Basic UI Configuration
+** Tweaking
+#+begin_src emacs-lisp 
+  ;; Don't show splash screen
+  (setq inhibit-startup-message t)
+  (setq inhibit-startup-screen t) 
+
+
+  ;; Remove scroll bar
+  (scroll-bar-mode -1)
+
+  ;; Remove tool bar
+  (tool-bar-mode -1)
+
+
+  (tooltip-mode -1)
+  (set-fringe-mode 10)
+
+  ;; Remove menu bar
+  (menu-bar-mode -1)
+
+  ;; Remember recently edited files
+  (recentf-mode 1)
+
+  ;; Minor modes
+  (global-hl-line-mode)
+  (blink-cursor-mode)
+
+  ;; Line numbers
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  eshell-mode-hook))
+    (add-hook mode (lambda() (display-line-numbers-mode 0))))
+
+  ;; Save minibuffer history
+  (setq history-length 25)
+  (savehist-mode 1)
+
+  ;; Save position in file
+  (save-place-mode 1)
+
+  ;; Don't use UI
+  (setq use-dialog-box nil)
+  
+#+end_src
+** Fonts
+
+** Theme
+#+begin_src emacs-lisp
+   
+  (load-theme 'modus-operandi t)
+
+  (set-frame-parameter (selected-frame) 'alpha '(95 . 95))
+  (add-to-list 'default-frame-alist '(alpha . (95 . 95)))
+
+
+#+end_src
+* Startup Performance
+** Display
+#+begin_src emacs-lisp
+  (defun efs/display-startup-time ()
+    (message "Emacs loaded in %s with %d garbage collections."
+             (format "%.2f seconds"
+                     (float-time
+                     (time-subtract after-init-time before-init-time)))
+             gcs-done))
+
+  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+  (setq use-package-verbose t)
+#+end_src
+** Garbage Collection
+#+begin_src emacs-lisp
+(setq gc-cons-threshold (* 2 1000 1000))
+#+end_src
+* Package configuration
+** Repositories
+#+begin_src emacs-lisp
+  (require 'package)
+
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
+
+  (add-to-list 'package-archives
+               '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
+  (package-initialize)
+  (unless package-archive-contents
+     (package-refresh-contents))
+
+
+  (require 'use-package)
+  (setq use-package-always-ensure t)
+#+end_src
+** Path fixing
+#+begin_src emacs-lisp
+  (setenv "PATH" (concat (getenv "PATH") ":/home/mcpear/.local/bin"))
+  (setq exec-path (append exec-path '("/home/mcpear/.local/bin")))
+#+end_src
+* Fonts
+#+begin_src emacs-lisp
+
+;;  (defun dw/replace-unicode-font-mapping (block-name old-font new-font)
+;;    (let* ((block-idx (cl-position-if
+;;                       (lambda (i) (string-equal (car i) block-name))
+;;                       unicode-fonts-block-font-mapping))
+;;           (block-fonts (cadr (nth block-idx unicode-fonts-block-font-mapping)))
+;;           (updated-block (cl-substitute new-font old-font block-fonts :test 'string-equal)))
+;;      (setf (cdr (nth block-idx unicode-fonts-block-font-mapping))
+;;            `(,updated-block))))
+;;
+;;  (use-package unicode-fonts
+;;         :custom
+;;         (unicode-fonts-skip-font-groups '(low-quality-glyphs))
+;;         :config
+;;         ;; Fix the font mappings to use the right emoji font
+;;         (mapcar
+;;          (lambda (block-name)
+;;            (dw/replace-unicode-font-mapping block-name "Apple Color Emoji" "Noto Color Emoji"))
+;;          '("Dingbats"
+;;            "Emoticons"
+;;            "Miscellaneous Symbols and Pictographs"
+;;            "Transport and Map Symbols"))
+;;         (unicode-fonts-setup))
+
+  (defvar efs/default-font-size 100)
+  (defvar efs/default-variable-font-size 100)
+
+
+  (set-face-attribute 'default nil :font "monofur Nerd Font" :height 110)
+  (setq default-frame-alist '((:font "monofur Nerd Font" :height 110)))
+
+  ;; Set the fixed pitch face
+  (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height efs/default-font-size)
+
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height efs/default-variable-font-size :weight 'regular)
+
+  #+end_src
+* UI Improvement Packages
+** Folders clean
+#+begin_src emacs-lisp
+  (use-package no-littering)
+  
+  ;; Move backups
+  (setq backup-directory-alist '(("." . "~/saves")))
+  (setq auto-save-file-name-transforms `((".*" "~/.saves" t)))
+
+#+end_src
+** Modeline
+#+begin_src emacs-lisp
+  (use-package all-the-icons)
+  
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom 
+    ((doom-modeline-hud nil)
+    (doom-modeline-height 20)
+    (doom-modeline-project-detection 'auto)))
+
+#+end_src
+** Ivy
+#+begin_src emacs-lisp
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)	
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
+
+  (use-package ivy-rich
+    :after ivy
+    :init
+    (ivy-rich-mode 1))
+  #+end_src
+** Counsel
+#+begin_src emacs-lisp
+  (use-package counsel
+    :bind (("M-x" . counsel-M-x)
+           ("C-x b" . counsel-switch-buffer)
+           ("C-x C-f" . counsel-find-file)
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history)))
+
+#+end_src
+
+** Helpful
+#+begin_src emacs-lisp
+  (use-package helpful
+    :defer 0
+    :custom
+    (counsel-describe-function-function #'helpful-callable)
+    (counsel-describe-variable-function #'helpful-variable)
+    :bind
+    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-variable] . counsel-describe-variable)
+    ([remap describe-key] . helpful-key))
+#+end_src
+** Which Key
+#+begin_src emacs-lisp
+  (use-package which-key
+    :defer 0
+    :diminish which-key-mode
+    :config
+    (which-key-mode)
+    (setq which-key-idle-delay 0.3))
+#+end_src
+* File Management
+** Dired
+#+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first"))
+    :config
+    (use-package dired-single)
+    (use-package all-the-icons-dired
+      :if (display-graphic-p)
+      :hook (dired-mode . all-the-icons-dired-mode)
+      :config (setq all-the-icons-dired-monochrome nil))
+    )
+
+#+end_src
+
+* Programming Packages
+** Rainbow Delimeters
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+** Project Management
+#+begin_src emacs-lisp
+  (use-package projectile
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy))
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    (when (file-directory-p "~/Programs")
+      (setq projectile-project-search-path '("~/Programs")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile
+    :after projectile
+    :config (counsel-projectile-mode))
+#+end_src
+** Git Management
+#+begin_src emacs-lisp
+    (use-package magit
+      :commands magit-status)
+
+    (use-package forge
+      :after magit
+      )
+#+end_src
+
+** Language Servers
+#+begin_src emacs-lisp
+  (use-package eglot
+    :after counsel-projectile)
+
+  (with-eval-after-load 'eglot
+    (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
+    (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
+    (define-key eglot-mode-map (kbd "C-c h") 'eldoc)
+    (define-key eglot-mode-map (kbd "<f6>") 'xref-find-definitions)
+
+    (add-hook 'python-mode-hook 'eglot-ensure))
+#+end_src
+
+* Org Mode
+** Base Config
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-c l") #'org-store-link)
+  (global-set-key (kbd "C-c a") #'org-agenda)
+  (global-set-key (kbd "C-c c") #'org-capture)
+
+  (defun efs/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode)
+    (auto-fill-mode 0)
+    (visual-line-mode 1))
+
+  (use-package org
+    :hook (org-mode . efs/org-mode-setup)
+    :commands (org-capture org-agenda)
+    :config
+    (message "Org mode loaded !")
+    (setq org-ellipsis " ▾"
+          org-hide-emphasis-markers t))
+#+end_src
+** Org Bullets
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+#+end_src
+** Configure Babel Languages
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (python . t)))
+
+    (setq org-confirm-babel-evaluate nil)
+    (push '("conf-unix" . conf-unix) org-src-lang-modes))
+#+end_src
+** Org Faces
+#+begin_src emacs-lisp
+  ;; Make sure org-indent face is available
+  ;; Increase the size of various headings
+  (with-eval-after-load 'org
+    (dolist (face '((org-level-1 . 1.2)
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font "Iosevka Aile" :weight 'medium :height (cdr face))
+
+      ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+      (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+      (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)))
+
+#+end_src
+** Org Tempo
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+    (require 'org-tempo)
+
+    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    (add-to-list 'org-structure-template-alist '("py" . "src python")))
+#+end_src
+** Auto-Tangle Configuration Files
+#+begin_src emacs-lisp
+  ;; Automatically tangle out Emacs.org config file when we save it
+  (defun efs/org-babel-tangle-config ()
+    (when (string-equal (buffer-file-name)
+                        (expand-file-name "~/.config/emacs/Emacs.org"))
+      (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle))))
+
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
+#+end_src
+
+* EXWM
+#+begin_src emacs-lisp
+  (defun efs/screenshot ()
+    (interactive
+     (start-process-shell-command
+      "scrot" nil "sleep 0.1; scrot -f -s -e 'xclip target image/png -i $f' -F ~/Screenshots/%Y-%m-%d-%T.png")
+
+     ))
+
+
+  ;; Save Screenshot
+  (global-set-key (kbd "C-c <print>")  'efs/screenshot)
+
+  (defun efs/clipmenu ()
+    (interactive
+     (start-process-shell-command
+      "clipmenu" nil "clipmenu")
+     )
+    )
+
+  ;; Clipmenu
+  (global-set-key (kbd "C-c m") 'efs/clipmenu)
+
+
+
+  ;; EMACS X WM
+
+  (defun efs/run-in-background (command)
+    (let ((command-parts (split-string command "[ ]+")))
+      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+  (defun efs/exwm-init-hook ()
+    ;; Show battery status in the mode line
+    (display-battery-mode 1)
+
+    ;; Show the time and date in modeline
+    (setq display-time-day-and-date t)
+    (display-time-mode 1)
+    ;; Also take a look at display-time-format and format-time-string
+
+    ;; Launch apps that will run in the background
+    (efs/run-in-background "nm-applet")
+    (efs/run-in-background "pasystray")
+    (efs/run-in-background "blueman-applet"))
+
+  (defun efs/exwm-update-class ()
+    (exwm-workspace-rename-buffer exwm-class-name))
+
+  ;; This function should be used only after configuring autorandr!
+  (defun efs/update-displays ()
+    (efs/run-in-background "autorandr --change --force")
+    (efs/set-wallpaper)
+    (message "Display config: %s"
+             (string-trim (shell-command-to-string "autorandr --current"))))
+
+  (defun efs/run-in-background (command)
+    (let ((command-parts (split-string command "[ ]+")))
+      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+  (defun efs/set-wallpaper ()
+    (interactive)
+    ;; NOTE: You will need to update this to a valid background path!
+    (start-process-shell-command
+        "feh" nil  "feh --randomize --bg-fill ~/.wallpapers/*"))
+
+
+
+  (use-package exwm
+    :commands exwm-enable
+    :config
+
+    ;; When window "class" updates, use it to set the buffer name
+    (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
+
+    ;; When EXWM starts up, do some extra confifuration
+    (add-hook 'exwm-init-hook #'efs/exwm-init-hook)
+
+    ;; Rebind CapsLock to Ctrl
+    (start-process-shell-command "xmodmap" nil "xmodmap ~/.Xmodmap")
+
+    ;; Set the default number of workspaces
+    (setq exwm-workspace-number 5)
+
+    ;; Set the screen resolution (update this to be the correct resolution for your screen!)
+    (require 'exwm-randr)
+    (exwm-randr-enable)
+    (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --mode 1366x768+0+0 -pos 0x0 --rotate normal --output HDMI-2 --primary --mode 1680x1050+1366+0 --pos 1366x0 --rotate normal")
+    (setq exwm-randr-workspace-output-plist '(0 "eDP-1" 1 "eDP-1" 2 "HDMI-2" 3 "HDMI-2" 4 "HDMI-2"))
+
+    ;; React to display connectivity changes, do initial display update
+    (add-hook 'exwm-randr-screen-change-hook #'efs/update-displays)
+
+    (efs/update-displays)
+
+    ;; Mouse 
+    (setq exwm-workspace-warp-cursor t)
+    (setq mouse-autoselect-window t
+          focus-follows-mouse t)
+
+    ;; Clipmenu
+    (start-process-shell-command "clipmenu-daemon" nil "clipmenud")
+
+
+    ;; Load the system tray before exwm-init
+    (require 'exwm-systemtray)
+    (setq exwm-systemtray-height 13)
+    (exwm-systemtray-enable)
+
+    ;; These keys should always pass through to Emacs
+    (setq exwm-input-prefix-keys
+      '(?\C-x
+        ?\C-u
+        ?\C-h
+        ?\M-x
+        ?\M-`
+        ?\M-&
+        ?\M-:
+        ?\C-\M-j  ;; Buffer list
+        ?\C-\ ))  ;; Ctrl+Space
+
+    ;; Ctrl+Q will enable the next key to be sent directly
+    (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+    ;; Set up global key bindings.  These always work, no matter the input state!
+    ;; Keep in mind that changing this list after EXWM initializes has no effect.
+    (setq exwm-input-global-keys
+          `(
+            ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+            ([?\s-r] . exwm-reset)
+
+            ;; Move between windows
+            ([s-left] . windmove-left)
+            ([s-right] . windmove-right)
+            ([s-up] . windmove-up)
+            ([s-down] . windmove-down)
+            ([?\s-h] . windmove-left)
+            ([?\s-l] . windmove-right)
+            ([?\s-k] . windmove-up)
+            ([?\s-j] . windmove-down)
+
+            ;; Launch applications via shell command
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))
+
+            ;; Launch Applications via menu
+            ([?\s-x] . counsel-linux-app)
+
+            ;; Switch workspace
+            ([?\s-w] . exwm-workspace-switch)
+            ([?\s-`] . (lambda () (interactive) (exwm-workspace-switch-create 0)))
+
+            ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch-create ,i))))
+                      (number-sequence 0 9))
+
+            )))
+#+end_src
+
+* Custom Variables
+#+begin_src emacs-lisp
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(custom-safe-themes
+     '("1704976a1797342a1b4ea7a75bdbb3be1569f4619134341bd5a4c1cfb16abad4" "d268b67e0935b9ebc427cad88ded41e875abfcc27abd409726a92e55459e0d01" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "57e3f215bef8784157991c4957965aa31bac935aca011b29d7d8e113a652b693" default))
+   '(elfeed-feeds
+     '("https://sachachua.com/blog/category/emacs-news/feed/" "https://www.playonlinux.com/fr/rss.xml" "http://intorust.com/feed.xml" "https://guix.gnu.org/feeds/blog.atom" "https://lukesmith.xyz/rss.xml" "https://suckless.org/atom.xml" "https://www.upr.fr/feed/" "https://blog.rust-lang.org/feed.xml" "https://www.kali.org/rss.xml"))
+   '(ispell-dictionary nil)
+   '(package-selected-packages
+     '(forge magit counsel-projectile projectile evil-collection general csharp-mode pdf-tools bongo emms minesweeper visual-fill-column org-bullets ein elfeed yaml-mode yaml helm-exwm exwm ocodo-svg-modelines nano-modeline doom-themes helpful ivy-rich which-key whick-key vterm evil afternoon-theme ewal-spacemacs-themes spacemacs-theme rust-mode all-the-icons-spaceline spaceline-all-the-icons doom-modeline-now-playing all-the-icons simple-modeline doom-modeline counsel ivy vimrc-mode lsp-mode cmake-mode use-package command-log-mode))
+   '(warning-suppress-types '((emacs))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+#+end_src
+
+
