@@ -49,7 +49,6 @@
   (setq use-dialog-box nil)
   
 #+end_src
-** Fonts
 
 ** Theme
 #+begin_src emacs-lisp
