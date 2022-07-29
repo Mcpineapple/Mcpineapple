@@ -534,28 +534,3 @@
 
             )))
 #+end_src
-
-* Custom Variables
-#+begin_src emacs-lisp
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(custom-safe-themes
-     '("1704976a1797342a1b4ea7a75bdbb3be1569f4619134341bd5a4c1cfb16abad4" "d268b67e0935b9ebc427cad88ded41e875abfcc27abd409726a92e55459e0d01" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "57e3f215bef8784157991c4957965aa31bac935aca011b29d7d8e113a652b693" default))
-   '(elfeed-feeds
-     '("https://sachachua.com/blog/category/emacs-news/feed/" "https://www.playonlinux.com/fr/rss.xml" "http://intorust.com/feed.xml" "https://guix.gnu.org/feeds/blog.atom" "https://lukesmith.xyz/rss.xml" "https://suckless.org/atom.xml" "https://www.upr.fr/feed/" "https://blog.rust-lang.org/feed.xml" "https://www.kali.org/rss.xml"))
-   '(ispell-dictionary nil)
-   '(package-selected-packages
-     '(forge magit counsel-projectile projectile evil-collection general csharp-mode pdf-tools bongo emms minesweeper visual-fill-column org-bullets ein elfeed yaml-mode yaml helm-exwm exwm ocodo-svg-modelines nano-modeline doom-themes helpful ivy-rich which-key whick-key vterm evil afternoon-theme ewal-spacemacs-themes spacemacs-theme rust-mode all-the-icons-spaceline spaceline-all-the-icons doom-modeline-now-playing all-the-icons simple-modeline doom-modeline counsel ivy vimrc-mode lsp-mode cmake-mode use-package command-log-mode))
-   '(warning-suppress-types '((emacs))))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   )
-#+end_src
-
-
