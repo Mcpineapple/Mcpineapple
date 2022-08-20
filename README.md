@@ -1,6 +1,5 @@
 ### Howdy, I'm Mcpineapple. 🌻
 
-- Currently learning Rust.
 - Pronouns : He/Him.
 <!--
 **Mcpineapple/Mcpineapple** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
