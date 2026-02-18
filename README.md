@@ -1,6 +1,6 @@
 ### Howdy, I'm Mcpineapple. 🌻
 
-🌱 I’m currently learning Rust
+🔭 I’m currently working on monkey-interpreter-rs, after reading *Writing An Interpreter In Go* by Thorsten Ball [interpreterbook.com]
 <!--
 **Mcpineapple/Mcpineapple** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
